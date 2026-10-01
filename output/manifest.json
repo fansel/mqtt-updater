@@ -1,0 +1,24 @@
+{
+  "version": "1.0.0",
+  "firmware_size": 149,
+  "total_chunks": 4,
+  "merkle_root": "0f4a5a7a1079cf66a7bae97dc0694df6f51d2a05508ce8102e6a19459938027a",
+  "chunks": [
+    {
+      "index": 0,
+      "filename": "chunk_0.bin"
+    },
+    {
+      "index": 1,
+      "filename": "chunk_1.bin"
+    },
+    {
+      "index": 2,
+      "filename": "chunk_2.bin"
+    },
+    {
+      "index": 3,
+      "filename": "chunk_3.bin"
+    }
+  ]
+}
