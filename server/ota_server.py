@@ -22,10 +22,8 @@ TOPIC_BASE = os.environ["TOPIC_BASE"]
 def split_firmware(data):
     if len(data) < 4:
         raise ValueError("firmware too small, need at least 4 bytes")
-
     base = len(data) // 4
     rest = len(data) % 4
-
     chunks = []
     start = 0
     for i in range(4):
@@ -49,12 +47,10 @@ def merkle_root(chunks):
 
 
 def prepare():
-    # step 1: split firmware, build merkle root, write chunks + manifest to OUTPUT_DIR
     with open(FIRMWARE_FILE, "rb") as f:
         firmware = f.read()
 
     chunks = split_firmware(firmware)
-    root = merkle_root(chunks)
 
     os.makedirs(OUTPUT_DIR, exist_ok=True)
     chunk_list = []
@@ -63,6 +59,12 @@ def prepare():
         with open(os.path.join(OUTPUT_DIR, filename), "wb") as f:
             f.write(chunks[i])
         chunk_list.append({"index": i, "filename": filename})
+
+    create_manifest(firmware, chunks, chunk_list)
+
+
+def create_manifest(firmware, chunks, chunk_list):
+    root = merkle_root(chunks)
 
     manifest = {
         "version": FIRMWARE_VERSION,
