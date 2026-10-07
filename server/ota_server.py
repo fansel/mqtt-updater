@@ -4,39 +4,36 @@ import json
 import os
 
 import paho.mqtt.client as mqtt
+from dotenv import load_dotenv
 
-FIRMWARE_FILE = "firmware.txt"
-FIRMWARE_VERSION = "1.0.0"
-OUTPUT_DIR = "output"
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+load_dotenv(os.path.join(BASE_DIR, ".env"))
 
-BROKER_HOST = "172.20.10.3"
-BROKER_PORT = 1883
-QOS = 1
-TOPIC_BASE = "ota/firmware"
+FIRMWARE_FILE = os.path.join(BASE_DIR, os.environ["FIRMWARE_FILE"])
+FIRMWARE_VERSION = os.environ["FIRMWARE_VERSION"]
+OUTPUT_DIR = os.path.join(BASE_DIR, os.environ["OUTPUT_DIR"])
+
+BROKER_HOST = os.environ["BROKER_HOST"]
+BROKER_PORT = int(os.environ["BROKER_PORT"])
+QOS = int(os.environ["QOS"])
+TOPIC_BASE = os.environ["TOPIC_BASE"]
 
 
 def split_firmware(data):
     if len(data) < 4:
         raise ValueError("firmware too small, need at least 4 bytes")
 
-    base = len(data) // 4  #9
-    print("base:", base)
-    rest = len(data) % 4   #1
-    print("rest:", rest)
+    base = len(data) // 4
+    rest = len(data) % 4
 
     chunks = []
     start = 0
-    print("start:", start)
     for i in range(4):
-        size = base #9
-        print("size:", size)
+        size = base
         if i < rest:
             size += 1
-            print("new size:", size)
         chunks.append(data[start:start + size])
-        print("array is from ", start, " to ", start + size, "")
         start += size
-        print("start:", start)
     return chunks
 
 
@@ -51,7 +48,8 @@ def merkle_root(chunks):
     return hashlib.sha256(h01 + h23).digest()
 
 
-def main():
+def prepare():
+    # step 1: split firmware, build merkle root, write chunks + manifest to OUTPUT_DIR
     with open(FIRMWARE_FILE, "rb") as f:
         firmware = f.read()
 
@@ -80,7 +78,26 @@ def main():
     print("manifest created:")
     print(json.dumps(manifest, indent=2))
 
-    publish_update(manifest, chunks)
+
+def load_update():
+    with open(os.path.join(OUTPUT_DIR, "manifest.json"), "r") as f:
+        manifest = json.load(f)
+
+    chunks = []
+    for entry in manifest["chunks"]:
+        with open(os.path.join(OUTPUT_DIR, entry["filename"]), "rb") as f:
+            chunks.append(f.read())
+        print("read", entry["filename"], "(" + str(len(chunks[-1])) + " bytes)")
+
+    return manifest, chunks
+
+
+def main(mode="all"):
+    if mode in ("all", "prepare"):
+        prepare()
+    if mode in ("all", "publish"):
+        manifest, chunks = load_update()
+        publish_update(manifest, chunks)
 
 
 def publish_update(manifest, chunks):
@@ -116,4 +133,6 @@ def publish_update(manifest, chunks):
 
 
 if __name__ == "__main__":
-    main()
+    import sys
+
+    main(sys.argv[1] if len(sys.argv) > 1 else "all")

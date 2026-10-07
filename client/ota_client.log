@@ -1,0 +1,14 @@
+2026-10-02 14:18:53 update REJECTED: no manifest received
+2026-10-02 14:21:28 update REJECTED: no manifest received
+2026-10-02 14:25:08 update REJECTED: no manifest received
+2026-10-02 14:27:00 update ACCEPTED: version 1.0.0, 149 bytes written to /Users/felixmansel/DEV/cyberSec/secInIot/mqtt-updater/client/firmware_reconstructed.txt
+2026-10-02 14:29:45 update REJECTED: no manifest received
+2026-10-02 14:30:56 update ACCEPTED: version 1.0.0, 149 bytes written to /Users/felixmansel/DEV/cyberSec/secInIot/mqtt-updater/client/firmware_reconstructed.txt
+2026-10-02 14:32:27 update REJECTED: no manifest received
+2026-10-02 14:35:29 update REJECTED: no manifest received
+2026-10-02 14:39:04 update ACCEPTED: version 1.0.0, 149 bytes written to /Users/felixmansel/DEV/cyberSec/secInIot/mqtt-updater/client/firmware_reconstructed.txt
+2026-10-02 14:39:20 update ACCEPTED: version 1.0.0, 149 bytes written to /Users/felixmansel/DEV/cyberSec/secInIot/mqtt-updater/client/firmware_reconstructed.txt
+2026-10-02 15:11:39 update REJECTED: size mismatch: got 147 bytes, manifest says 149
+2026-10-02 15:12:04 update ACCEPTED: version 1.0.0, 149 bytes written to /Users/felixmansel/DEV/cyberSec/secInIot/mqtt-updater/client/firmware_reconstructed.txt
+2026-10-02 15:17:23 update ACCEPTED: version 1.0.0, 149 bytes written to /Users/felixmansel/DEV/cyberSec/secInIot/mqtt-updater/client/firmware_reconstructed.txt
+2026-10-02 15:17:58 update REJECTED: merkle root mismatch: calculated 1369a7365ec8542c41f14652fa53adeb8509443df38b4362808a4a9c23de253d, manifest has 0f4a5a7a1079cf66a7bae97dc0694df6f51d2a05508ce8102e6a19459938027a

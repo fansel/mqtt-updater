@@ -2,20 +2,27 @@ import base64
 import hashlib
 import json
 import os
+import threading
 import time
 
 import paho.mqtt.client as mqtt
+from dotenv import load_dotenv
 
-BROKER_HOST = "172.20.10.3"
-BROKER_PORT = 1883
-QOS = 1
-TIMEOUT = 30
-OUTPUT_FILE = "firmware_reconstructed.txt"
-LOG_FILE = "ota_client.log"
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+load_dotenv(os.path.join(BASE_DIR, ".env"))
+
+BROKER_HOST = os.environ["BROKER_HOST"]
+BROKER_PORT = int(os.environ["BROKER_PORT"])
+QOS = int(os.environ["QOS"])
+TOPIC_BASE = os.environ["TOPIC_BASE"]
+TIMEOUT = int(os.environ["TIMEOUT"])
+OUTPUT_FILE = os.path.join(BASE_DIR, os.environ["OUTPUT_FILE"])
+LOG_FILE = os.path.join(BASE_DIR, os.environ["LOG_FILE"])
 
 manifest = None
 chunks = {}
 first_message_time = None
+subscribed = threading.Event()
 
 
 def log(text):
@@ -38,9 +45,12 @@ def merkle_root(chunks):
 
 def on_connect(client, userdata, flags, reason_code, properties):
     print("connected to broker:", reason_code)
-    # subscribe here so we subscribe again after a reconnect
-    client.subscribe("ota/firmware/+/manifest", qos=QOS)
-    client.subscribe("ota/firmware/+/chunk/+", qos=QOS)
+    client.subscribe([(TOPIC_BASE + "/+/manifest", QOS), (TOPIC_BASE + "/+/chunk/+", QOS)])
+
+
+def on_subscribe(client, userdata, mid, reason_code_list, properties):
+    print("subscribed:", reason_code_list)
+    subscribed.set()
 
 
 def on_message(client, userdata, msg):
@@ -104,13 +114,13 @@ def verify_update(timed_out):
 
 
 def main():
-    # don't leave an old result around, the file should only exist after a successful update
     if os.path.exists(OUTPUT_FILE):
         os.remove(OUTPUT_FILE)
 
     client = mqtt.Client(mqtt.CallbackAPIVersion.VERSION2, client_id="ota-client")
     client.on_connect = on_connect
     client.on_message = on_message
+    client.on_subscribe = on_subscribe
     client.connect(BROKER_HOST, BROKER_PORT)
     client.loop_start()
 
